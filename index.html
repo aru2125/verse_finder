@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Find Your Verse</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url(bg.jpg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height:500px;
+      margin: 0;
+    }
+
+    .container {
+      background-image: url(cardbg.jpg);
+      background-size: cover;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 10px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 350px;
+    }
+
+    input {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #f7738b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor:cell;
+      font-size: 16px;
+      width: 100%;
+      margin-top: 10px;
+      font-weight: 800;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #272626;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Find Your Bible Verse</h2>
+    <input type="text" id="name" placeholder="Enter your name" required />
+    <input type="date" id="dob" required />
+    <button onclick="findVerse()">Get your Verse</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+  const bookMap = {
+    A: "Acts", B: "Job", C: "2 Chronicles", D: "Deuteronomy", E: "Ezekiel",
+    F: "Exodus", G: "Genesis", H: "Hebrews", I: "Isaiah", J: "Jeremiah",
+    K: "1 Kings", L: "Luke", M: "Matthew", N: "Numbers", O: "Mark",
+    P: "Proverbs", Q: "Joshua", R: "Revelation", S: "1 Samuel",
+    T: "psalms", U: "Judges", V: "Leviticus", W: "2 Kings", X: "2 Samuel",
+    Y: "1 Chronicles", Z: "Zechariah"
+  };
+
+  function findVerse() {
+    const name = document.getElementById("name").value.trim();
+    const dob = document.getElementById("dob").value;
+    const resultDiv = document.getElementById("result");
+
+    if (!name || !dob) {
+      resultDiv.textContent = "Please enter both name and date of birth.";
+      return;
+    }
+
+    const firstLetter = name[0].toUpperCase();
+    const book = bookMap[firstLetter] || "Psalms";
+    const dateObj = new Date(dob);
+    const chapter = dateObj.getDate()  ;
+    const verse = dateObj.getFullYear() % 10 || 1;
+
+    const safeBook = book.replace(/\s/g, "+");
+    const apiUrl = `https://bible-api.com/${safeBook}+${chapter}:${verse}`;
+
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.text) {
+          resultDiv.innerHTML = `<strong>${data.reference}</strong><br>${data.text}`;
+        } else {
+resultDiv.textContent =
+  "Sorry, verse not found in " + book + `. Try another date.\nBut here's a suggestion: Psalms ${chapter}:${verse}`;   }
+      })
+      .catch(error => {
+        console.error(error);
+        resultDiv.textContent = "Something went wrong fetching the verse.";
+      });
+  }
+</script>
+</body>
+</html>
